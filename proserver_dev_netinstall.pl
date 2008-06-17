@@ -114,9 +114,9 @@ if (!(eval "use Bio::Perl $version; 1")) {
   my $package_name = 'bioperl-1.5.2_102';
   my $bioperl_core_tar_gz = 'http://bioperl.org/DIST/current_core_unstable.tar.gz';
   my $cmd = "curl -O $bioperl_core_tar_gz";
-  print STDERR "Checking out $package_name...\n";
-  system($cmd) or die "Failed to download the BioPerl Core: $!\n";
-  system("tar zxvf current_cre_unstable.tar.gz");
+  print STDERR "Downloading $package_name...\n";
+  system($cmd) == 0 or die "Failed to download the BioPerl Core: $!\n";
+  system("tar zxvf current_core_unstable.tar.gz") == 0 or die "Failed to open the archive: $!\n";
   chdir "./$package_name";
   my $build_str = './Build';
   system("$perl $build_str.PL --yes=1") == 0
