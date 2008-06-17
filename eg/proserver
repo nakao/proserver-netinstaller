@@ -1,0 +1,21 @@
+#!/usr/local/bin/perl
+#########
+# ProServer DAS Server
+# Author:        rmp
+# Maintainer:    $Author: zerojinx $
+# Created:       2003-05-22
+# Last Modified: $Date: 2008-03-13 19:59:49 +0900 (木, 13  3 2008) $
+# Source:        $Source: /nfs/team117/rmp/tmp/Bio-Das-ProServer/Bio-Das-ProServer/eg/proserver,v $
+# Id:            $Id: proserver 460 2008-03-13 10:59:49Z zerojinx $
+# $HeadURL: https://proserver.svn.sf.net/svnroot/proserver/trunk/eg/proserver $
+#
+package proserver;
+use lib qw(./blib/lib ../blib/lib . ..);
+use Bio::Das::ProServer;
+use strict;
+use warnings;
+
+our $VERSION = q(2.8);#do { my @r = (q$Revision: 460 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+
+Bio::Das::ProServer->run();
+0;

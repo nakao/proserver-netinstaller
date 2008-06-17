@@ -1,0 +1,41 @@
+8
+
+dir
+493
+https://proserver.svn.sf.net/svnroot/proserver/trunk/eg/data
+https://proserver.svn.sf.net/svnroot/proserver
+
+
+
+2008-03-12T14:50:11.661146Z
+453
+andyjenkinson
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+a29f28db-5a43-0410-bd8f-b8b57ca7b856
+
+mysimple.txt
+file
+
+
+
+
+2008-06-17T05:24:55.000000Z
+55d0746a2ca2f0f67b1b71a8a6ab6db6
+2008-03-12T14:50:11.661146Z
+453
+andyjenkinson
+has-props
+
