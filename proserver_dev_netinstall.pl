@@ -6,31 +6,26 @@ proserver_dev_netinstall.pl
 
 =head1 SYNOPSIS
 
-  proserver_dev_netinstall.pl -b|--build_param_str BUILD_STRING [options]
+  proserver_dev_netinstall.pl 
 
 options: 
 
  -h|--help                Show this message 
- -d|--dev                 Use the developement version of both ProServer
-                            and bioperl from Subversion/CVS
- --build_param_str=<args> Use this string to set Makefile.PL parameters
-                            such as CONF or PREFIX for ProServer 
-                            installation
- --install_param_str=<args>
-                           Use this string to predefine 'make install' 
-                            parameters such as CONF or PREFIX for
-                            ProServer installation
- --skip_start             Don't wait for 'Enter' at program start
+ -s|--skip_start          Don't wait for 'Enter' at program start
 
 =head1 DESCRIPTION
 
-Net-based installer of ProServer
+Net-based installer of ProServer.
 
-Save this to disk as "proserver_dev_netinstall.pl" and run:
 
    [sudo] perl proserver_dev_netinstall.pl
 
+This script is based on the gbrowse net-based Installer Script at http://gmod.org/wiki/index.php/GBrowse.
+
+The project site is here: http://github.com/nakao/proserver-netinstaller/tree/master
+
 =cut
+
 
 
 use warnings;
@@ -44,64 +39,56 @@ use File::Temp qw(tempdir);
 use LWP::Simple;
 use Cwd;
 
-my ( $show_help, $build_param_string, $working_dir,
-     $binaries, $make, $tmpdir, $skip_start, $install_param_string, $PERL);
-$PERL = $^X;
-$build_param_string = "";
-$install_param_string = "";
+my ( $show_help, $make, $working_dir, $tmpdir, $skip_start, $perl, $version );
+
 
 BEGIN {
-  GetOptions(
-        'h|help'              => \$show_help,             # Show help and exit
-        'build_param_str=s'   => \$build_param_string,    # Build parameters
-        'install_param_str=s' => \$install_param_string,
-        'skip_start'          => \$skip_start,
+    GetOptions(
+        'h|help'      => \$show_help,             # Show help and exit
+        'skip_start'  => \$skip_start,
         )
         or pod2usage(2);
-  pod2usage(2) if $show_help;
+    pod2usage(2) if $show_help;
   
+    print STDERR "\nAbout to install ProServer and all its prerequisites.\n",
+                 "\nPress return when you are ready to start!\n";
+    my $h = <> unless $skip_start;
 
-  print STDERR "\nAbout to install ProServer and all its prerequisites.\n",
-               "\nPress return when you are ready to start!\n";
-  my $h = <> unless $skip_start;
+    print STDERR "*** Installing Perl files needed for a net-based install ***\n";
+
+    eval "CPAN::Config->load";
+    eval "CPAN::Config->commit";
 
 
-  print STDERR "*** Installing Perl files needed for a net-based install ***\n";
+    $working_dir = getcwd;
+    $tmpdir = tempdir(CLEANUP=>1) or die "Could't create temporary directory: $!";
+    $make = $Config{'make'};
+    $perl = $^X;
 
-  eval "CPAN::Config->load";
-  eval "CPAN::Config->commit";
-
-  $working_dir = getcwd;
-  $tmpdir = tempdir(CLEANUP=>1) or die "Could't create temporary directory: $!";
-
-  $binaries = $Config{'binexp'};
-  $make     = $Config{'make'};
-
-  eval "use Archive::Zip ':ERROR_CODES',':CONSTANTS'";
-  my @pkgs = ('YAML',
-	      'Archive::Zip',
-	      'HTML::Tagset',
-	      'LWP::Simple',
-	      'Archive::Tar',
-	      'Digest::SHA',
-      );
-  foreach (@pkgs) {
-      CPAN::Shell->install($_);
-  }
-  1;
+    eval "use Archive::Zip ':ERROR_CODES',':CONSTANTS'";
+    my @pkgs = ('YAML',
+		'Archive::Zip',
+		'HTML::Tagset',
+		'LWP::Simple',
+		'Archive::Tar',
+		'Digest::SHA',
+	);
+    foreach (@pkgs) {
+	CPAN::Shell->install($_);
+    }
+    1;
 };
 
 use Archive::Tar;
 use CPAN '!get';
 
+use constant GD_REQUIRES       => '2.31';
+use constant BIOPERL_REQUIRES  => '1.005002';  
+use constant PROSERVER_DEFAULT => '2.8';
 
-use constant BIOPERL_REQUIRES     => '1.005002';  # sorry for the redundancy
-use constant PROSERVER_DEFAULT    => '2.8';
+$version = GD_REQUIRES;
+CPAN::Shell->install('GD') unless ( eval "use GD $version; 1" );
 
-unless ( eval "use GD 2.31; 1" ) {
-    print STDERR "Installing GD via CPAN...\n";
-    CPAN::Shell->install('GD');
-}
 
 
 
@@ -119,22 +106,22 @@ foreach (@pkgs) {
     CPAN::Shell->install($_);
 }
 
-my $version = BIOPERL_REQUIRES;
+$version = BIOPERL_REQUIRES;
 if (!(eval "use Bio::Perl $version; 1")) {
   print STDERR "\n*** Installing BioPerl ***\n";
   CPAN::Shell->install('Module::Build');
   chdir $tmpdir;
   my $package_name = 'bioperl-1.5.2_102';
-  my $bioperl_core_tar_gz => 'http://bioperl.org/DIST/current_core_unstable.tar.gz';
+  my $bioperl_core_tar_gz = 'http://bioperl.org/DIST/current_core_unstable.tar.gz';
   my $cmd = "curl -O $bioperl_core_tar_gz";
   print STDERR "Checking out $package_name...\n";
-  system($cmd) == 0 or die "Failed to download the BioPerl Core: $!\n";
-  system("tar zxvf current_cre_unstable.tar.gz") == 0;
+  system($cmd) or die "Failed to download the BioPerl Core: $!\n";
+  system("tar zxvf current_cre_unstable.tar.gz");
   chdir "./$package_name";
   my $build_str = './Build';
-  system("$PERL $build_str.PL --yes=1")   == 0
-      or die "Couldn't run $PERL Build.PL command\n";
-  system("$build_str install --uninst 1") == 0;
+  system("$perl $build_str.PL --yes=1") == 0
+      or die "Couldn't run $perl Build.PL command\n";
+  system("$build_str install --uninst 1");
 } else {
   print STDERR "BioPerl is up to date.\n";
 }
@@ -178,9 +165,12 @@ print STDERR "Checking out $package_name...\n";
 chdir $tmpdir;
 system($svn_co) == 0 or die "Failed to check out the ProServer from SVN: $!\n";
 chdir "./$package_name";
-system("$PERL Makefile.PL $build_param_string") == 0
-    or die "Couldn't run $PERL Makefile.PL command\n";
-system("$make install UNINST=1 $install_param_string") == 0;
+system("$perl Makefile.PL") == 0 or die "Couldn't run $perl Makefile.PL command\n";
+system("$make install UNINST=1");
+
+print "\n\n\n* You can start proserver:\n\n",
+    "  perl eg/proserver -x\n",
+    "  and open http://localhost:9000\n\n";
 
 exit 0;
 
