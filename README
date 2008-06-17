@@ -1,0 +1,28 @@
+ProServer Netinstaller
+http://github.com/nakao/proserver-netinstaller
+
+This script will automatically download and install ProServer (Bio-Das-ProServer) and BioPerl libraries for you.
+
+
+USAGE
+
+  sudo perl proserver_dev_netinstall.pl
+  perl eg/proserver -x
+  (open http://localhost:9000)
+
+
+LICENCE
+
+proserver_dev_netinstall.pl is based on the gbrowse net-install script (http://gmod.org/wiki/index.php/GBrowse).
+  Licence: Artistic Licence.
+
+Files at eg/* and eg/stylesheets/* are copy from Bio-Das-ProServer/eg/* and Bio-Das-ProServer/stylesheets/* files (http://www.sanger.ac.uk/proserver/).
+  Licence: the same term as Perl itself.
+
+The rests.
+  Licence: the same term as Perl itself.
+
+
+AUTHOR
+
+Mitsuteru Nakao Ph.D. mn AT kazusa.or.jp, n AT bioruby.org
